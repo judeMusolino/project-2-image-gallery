@@ -9,7 +9,8 @@ export class ImageGallery extends LitElement {
 
   constructor() {
     super();
-    this.expandedimg = "https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg"; 
+    this.expandedimg = ''; 
+    this.imagetext = ''; 
   }
 
   static get styles() {
@@ -37,17 +38,21 @@ export class ImageGallery extends LitElement {
     }
 
     .container {
-        position: relative;
-        display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
     }
 
-
-    #imgtext {
-        position: absolute;
-        bottom: 15px;
-        left: 15px;
-        color: white;
-        font-size: 20px;
+    .bigimage {
+        max-width: 90%;
+        max-height: 90%;
     }
 
     .closebtn {
@@ -62,39 +67,45 @@ export class ImageGallery extends LitElement {
   }
 
   expandImage(e) {
-    var bigImg = document.getElementById("bigimage");
-    var imgText = document.getElementById("imgtext");
-    bigImg.src = e.src;
-    imgText.innerHTML = e.alt;
-    expandImg.parentElement.style.display = "block";
+    const smallImage = e.target;
+    this.expandedimg = smallImage.src;
+    this.imagetext = smallImage.alt;
+  }
+
+  minimize() {
+    this.expandedimg = '';
+    this.imagetext = '';
   }
   
   render() {
    
     return html`
     <div class="row">
-        <div class="column">
-            <img src="https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg" alt="Snow" onclick="${this.expandImage}">
+        <div class="column" onclick="${this.expandImage}">
+            <img class="littleimage" src="https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg" alt="Snow">
         </div>
         <div class="column">
             <img src="https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg" alt="Mountains" onclick="${this.expandImage}">
         </div>
-        <div class="column">
-            <img src="https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg" alt="Lights" onclick="${this.expandImage}">
+        <div class="column" onclick="${this.expandImage}">
+            <img src="https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg" alt="Lights">
         </div>
     </div>
 
+    ${this.expandedimg ? html`
     <div class="container">
-        <span onclick="${this.parentElement.minimize}" class="closebtn">x</span>
-        <img class = "bigimage" src="${this.expandedimg}" style="width:100%">
-        <div class="imgtext"></div>
-    </div>
+      <span @click="${this.minimize}" class="closebtn">x</span>
+      <img class="bigimage" src="${this.expandedimg}">
+      <div class="imgtext">${this.imagetext}</div>
+    </div>` : ''}
+    
     `;
   }
 
   static get properties() {
     return {
-        
+        expandedimg : { type: String },
+        imagetext : { type: String },
     };
   }
 }
