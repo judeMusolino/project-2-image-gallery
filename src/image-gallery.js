@@ -9,13 +9,33 @@ export class ImageGallery extends LitElement {
 
   constructor() {
     super();
-    this.expandedimg = ''; 
-    this.imagetext = ''; 
+    this.image = []; 
+    this.imageNumber = 1;
+    this.totalImages = 3; 
     this.opened = false; 
   }
 
   static get styles() {
     return css`
+    :host {
+      display: none
+    }
+
+    :host([opened]) {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: inline-block;
+      padding: 100px 0; 
+      justify-content: center;
+      vertical-align: middle; 
+      text-align: center; 
+      z-index: 999; 
+    }
+
     .column {
         float: left;
         width: 200px;
@@ -47,11 +67,6 @@ export class ImageGallery extends LitElement {
       z-index: 999;
     }
 
-    .imgtext {
-      font-size: 16px;
-      color: white; 
-    }
-
     .bigimage {
       max-width: 90%;
       max-height: 90%;
@@ -79,54 +94,70 @@ export class ImageGallery extends LitElement {
       position: absolute; 
       right: 16px; 
     }
-
     `;
   }
 
-  expandImage(e) {    
-    this.opened = true; 
-    const smallImage = e.target;
-    this.expandedimg = smallImage.src;
-    this.imagetext = smallImage.alt;
+  minimize() {
+    this.opened = false; 
   }
 
-  minimize() {
-    this.expandedimg = '';
-    this.imagetext = '';
-    this.opened = false; 
+  firstUpdated(){
+    var data = document.querySelectorAll('media-image'); 
+    data.forEach(image => {
+      this.image.push(image.getAttribute('source')); 
+    })
+
+    console.log(this.image); 
+
+    document.addEventListener('image-opened', (e) => {
+      var url = e.target.attributes.source.nodeValue; 
+      this.imageNumber = this.image.indexOf(url) + 1;
+      this.opened = true; 
+    })
+  }
+
+  slideleft() {
+    if (this.imageNumber > 1) {
+      this.imageNumber = this.imageNumber-1; 
+    }
+    else {
+      this.imageNumber = this.totalImages; 
+    } 
+    this.requestUpdate(); 
+  }
+
+  slideleft() {
+    if (this.imageNumber < this.totalImages) {
+      this.imageNumber = this.imageNumber+1; 
+    }
+    else {
+      this.imageNumber = 1; 
+    } 
+    this.requestUpdate(); 
   }
   
   render() {
-    return html`
-    <div class="row">
-        <div class="column" @click="${this.expandImage}">
-            <img src="https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg" alt="Snow">
-        </div>
-        <div class="column" @click="${this.expandImage}">
-            <img src="https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg" alt="Mountains">
-        </div>
-        <div class="column" @click="${this.expandImage}">
-            <img src="https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg" alt="Lights">
-        </div>
-    </div>
-
-    ${!this.opened ? '' : html`
+    return (!this.opened) ? html`` : html`
     <div class="container">
+      <div class="currentImage">${this.imageNumber}</div>
+      <div> of </div>
+      <div class="totalImage">${this.totalImages}</div>
+      
       <span @click="${this.minimize}" class="closebtn">x</span>
-      <div class="moveLeft" @click="${this.slideleft}"><</div>
-      <div class="moveRight" @click="${this.slideright}">></div>
-      <img class="bigimage" src="${this.expandedimg}">
-      <p class="imgtext">${this.imagetext}</p>
-    </div>`}
+      <span class="moveLeft" @click="${this.slideleft}"><</span>
+      <span class="moveRight" @click="${this.slideright}">></span>
+      <img id="image" src="${this.image[this.imageNumber-1]}" alt="Mountains">
+    </div>
     
     `;
   }
 
   static get properties() {
     return {
-        expandedimg : { type: String },
-        imagetext : { type: String },
-        opened : { type: Boolean },
+        image : { type: Array },
+        imageNumber : { type: Number },
+        totalImages : { type: Number },
+        opened : { type: Boolean, reflect: true },
     };
   }
 }
