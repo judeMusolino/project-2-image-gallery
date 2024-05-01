@@ -1,7 +1,8 @@
 
-import { LitElement, html, css } from 'lit';
+import { html, css } from 'lit';
+import { DDD } from "@lrnwebcomponents/d-d-d/d-d-d.js";
 
-export class ImageGallery extends LitElement {
+export class ImageGallery extends DDD {
   
   static get tag() {
     return 'image-gallery';
@@ -10,13 +11,18 @@ export class ImageGallery extends LitElement {
   constructor() {
     super();
     this.image = []; 
+    this.captions = []; 
+    this.descriptions = []; 
     this.imageNumber = 1;
-    this.totalImages = 3; 
+    this.totalImages = 4; 
     this.opened = false; 
+    
   }
 
   static get styles() {
-    return css`
+    return [
+    super.styles,
+    css`
     :host {
       display: none
     }
@@ -27,7 +33,7 @@ export class ImageGallery extends LitElement {
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: rgba(0, 0, 0, 0.9);
       display: inline-block;
       padding: 100px 0; 
       justify-content: center;
@@ -36,65 +42,59 @@ export class ImageGallery extends LitElement {
       z-index: 999; 
     }
 
-    .column {
-        float: left;
-        width: 200px;
-        padding: 10px;
-    }
-
-    .column img {
-      opacity: 0.8;
-      cursor: pointer;
-      width: 200px; 
-    }
-
-    .column img:hover {
-      opacity: 1;
-    }
-
-    .container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      display: inline-block;
-      padding: 100px 0; 
-      justify-content: center;
-      vertical-align: middle; 
-      text-align: center; 
-      z-index: 999;
-    }
-
-    .bigimage {
-      max-width: 90%;
-      max-height: 90%;
-    }
-
     .closebtn {
       position: absolute;
-      top: 10px;
-      right: 16px;
+      top: var(--ddd-spacing-4);
+      right: var(--ddd-spacing-8);
       color: white;
       font-size: 36px;
       cursor: pointer;
+    }
+
+    .slidecontainer {
+      margin: auto; 
+      width: 600px;  
+      padding: var(--ddd-spacing-4); 
+    }
+    .currentImage, .of, .totalImage {
+      font-size: 18px; 
+      color: white; 
+      padding: var(--ddd-spacing-8); 
+      padding-bottom: 100px; 
+      display: inline-block; 
+      vertical-align: middle; 
     }
 
     .moveLeft{
       font-size: 36px;
       color: white; 
       position: absolute; 
-      left: 16px; 
+      left: var(--ddd-spacing-8); 
     }
 
     .moveRight{
       font-size: 36px;
       color: white; 
       position: absolute; 
-      right: 16px; 
+      right: var(--ddd-spacing-8); 
     }
-    `;
+
+    .moveLeft:hover, .moveRight:hover, .closebtn:hover {
+      cursor: pointer; 
+      color: var(--ddd-theme-default-athertonViolet); 
+    }
+    
+    .details{
+      font-size: 16px; 
+      color: white;
+      padding: 100px;  
+    }
+
+    #image {
+      transform: scale(1.5); 
+      padding: 4px;  
+    }
+    `];
   }
 
   minimize() {
@@ -105,6 +105,8 @@ export class ImageGallery extends LitElement {
     var data = document.querySelectorAll('media-image'); 
     data.forEach(image => {
       this.image.push(image.getAttribute('source')); 
+      this.captions.push(image.getAttribute('caption')); 
+      this.descriptions.push(image.getAttribute('description')); 
     })
 
     console.log(this.image); 
@@ -126,7 +128,7 @@ export class ImageGallery extends LitElement {
     this.requestUpdate(); 
   }
 
-  slideleft() {
+  slideright() {
     if (this.imageNumber < this.totalImages) {
       this.imageNumber = this.imageNumber+1; 
     }
@@ -138,26 +140,33 @@ export class ImageGallery extends LitElement {
   
   render() {
     return (!this.opened) ? html`` : html`
+    <script type="module" src="./src/media-image.js"></script>
+    
     <div class="container">
-      <div class="currentImage">${this.imageNumber}</div>
-      <div> of </div>
-      <div class="totalImage">${this.totalImages}</div>
-      
+      <div class="slidecontainer">
+        <div class="currentImage">${this.imageNumber}</div>
+        <div class="of"> of </div>
+        <div class="totalImage">${this.totalImages}</div>
+      </div>
+
       <span @click="${this.minimize}" class="closebtn">x</span>
       <span class="moveLeft" @click="${this.slideleft}"><</span>
       <span class="moveRight" @click="${this.slideright}">></span>
-      <img id="image" src="${this.image[this.imageNumber-1]}" alt="Mountains">
+      <media-image id="image" source="${this.image[this.imageNumber-1]}" caption="${this.captions[this.imageNumber-1]}" description="${this.descriptions[this.imageNumber-1]}"></media-image>
+      <div class="details">${this.descriptions[this.imageNumber-1]}</div>
     </div>
-    
     `;
   }
 
   static get properties() {
     return {
-        image : { type: Array },
-        imageNumber : { type: Number },
-        totalImages : { type: Number },
-        opened : { type: Boolean, reflect: true },
+      ...super.properties,
+      image : { type: Array },
+      captions : { type: Array },
+      descriptions : { type: Array },
+      imageNumber : { type: Number },
+      totalImages : { type: Number },
+      opened : { type: Boolean, reflect: true },
     };
   }
 }
