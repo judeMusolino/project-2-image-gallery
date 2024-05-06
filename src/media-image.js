@@ -45,6 +45,7 @@ export class MediaImage extends DDD {
                 .wrapper:hover {
                     box-shadow: 0px 0px 16px var(--ddd-theme-default-wonderPurple);
                     transform: scale(1.05); 
+                    cursor: pointer; 
                 }
 
                 .image {
